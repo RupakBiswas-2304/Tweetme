@@ -7,19 +7,62 @@
         <h2>Welcome to Tweetme</h2>
     </div>
 </div>
+
+<div class="row ">
+    <div class="col-md-4 mx-auto col-10">
+        <form action="/create-tweets" id="tweet-create-form" method = 'POST' class="form">{% csrf_token %}
+            <input type="hidden" value = "/" name="next">
+            <textarea rows="" class="form-control" name="content" placeholder="Your tweet" cols=""></textarea>
+            <button type="submit" class ="btn btn-primary">Submit</button>
+        </form>
+    </div>
+</div>
+
 <div class="row" id="tweets">Loading....</div>
 
-<script>
-    const tweetsElement = document.getElementById("tweets")
-    tweetsElement.innerHTML = 'Loading..'
 
-    
-    function handledidlike(tweet_id, currentCount){
-        console.log(tweet_id+"+"+currentCount)
-        currentCount++
+
+
+
+
+
+<script>
+    function handle_tweet_form_did_submite(event){
+        event.preventDefault()
+        const myForm = event.target
+        const myFormData = new FormData(myForm)
+        // for( var myItem of myFormData.entries()){
+        //     console.log(myItem)
+        // }
+        const url = myForm.getAttribute("action")
+        const method = myForm.getAttribute("method")
+        // console.log(url,method)
+
+        const xhr = new XMLHttpRequest()
+        xhr.open(method,url)
+        xhr.setRequestHeader("XHR_X_REQUESTED_WITH","XMLHttpRequest")
+        xhr.setRequestHeader("X-Requested-With","XMLHttpRequest")
+        xhr.onload = function(){
+            const serverResponse = xhr.response
+            // console.log(serverResponse)
+            const tweetsEl = document.getElementById("tweets")
+            loadtweet(tweetsEl)
+        }
+        xhr.send(myFormData)
 
     }
 
+    const tweetcreateform1 = document.getElementById("tweet-create-form")
+    tweetcreateform1.addEventListener("submit",handle_tweet_form_did_submite )
+
+    const tweetsEl = document.getElementById("tweets")
+
+    function handledidlike(tweet_id, currentCount){
+        console.log(tweet_id+"+"+currentCount)
+        currentCount++
+        
+    }
+    
     function LikeBtn(tweet) {
         return "<button class = 'btn btn-primary' onclick = handledidlike("+ (tweet.id)+","+(tweet.Likes) +")>"+(tweet.Likes)+"Likes</button>"
     }
@@ -28,29 +71,36 @@
         var formattedtweet = "<div class='col-12 border-bottom py-3 mb-4' id = 'tweet-" + tweet.id + "'><h1>" + tweet.id + "</h1>" + "<p>" + tweet.content + "</p><div>"+LikeBtn(tweet)+"</div></div>"
         return formattedtweet
     }
+    
+    function loadtweet(tweetsElement){
+        const xhr = new XMLHttpRequest()
+        const method = 'GET'//POST
+        const url = "/tweets"
+        const responseType = "json"
 
-    const xhr = new XMLHttpRequest()
-    const method = 'GET'//POST
-    const url = "/tweets"
-    const responseType = "json"
-
-    xhr.responseType = responseType
-    xhr.open(method, url)
-    xhr.onload = function () {
-        // console.log(xhr.response)
-        const serverResponse = xhr.response
-        var listeditems = xhr.response.response
-        var finaltweetstr = ""
-        var i;
-        for (i = 0; i < listeditems.length; i++) {
-            // console.log(i)
-            var currectitem = formattweetelement(listeditems[i])
-            finaltweetstr += currectitem
+        xhr.responseType = responseType
+        xhr.open(method, url)
+        xhr.onload = function () {
+            // console.log(xhr.response)
+            const serverResponse = xhr.response
+            var listeditems = xhr.response.response
+            var finaltweetstr = ""
+            var i;
+            for (i = 0; i < listeditems.length; i++) {
+                // console.log(i)
+                var currectitem = formattweetelement(listeditems[i])
+                finaltweetstr += currectitem
+            }
+            tweetsElement.innerHTML = finaltweetstr
+            // console.log(listeditems)
         }
-        tweetsElement.innerHTML = finaltweetstr
-        // console.log(listeditems)
-    }
     xhr.send()
+    }
+
+    loadtweet(tweetsEl)
+
+
+
 </script>
 
 

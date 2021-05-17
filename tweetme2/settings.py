@@ -26,7 +26,7 @@ SECRET_KEY = '@0xs(iwinf_2f=v@_hhbc(&@1xh)=022+)7r2cp0soc-&@mhgx'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1']
 
 
 # Application definition

@@ -1,5 +1,8 @@
-from django.shortcuts import render
+from tweetme2.settings import ALLOWED_HOSTS
+from django.shortcuts import render,redirect
 from django.http import HttpResponse,Http404,JsonResponse
+from django.utils.http import is_safe_url
+from django.conf import settings
 import random
 from .models import Tweet
 from .form import Tweet, TweetForm
@@ -10,9 +13,16 @@ def home_view(request, *args, **kwargs):
 
 def tweet_creat_view(request,*args,**kwargs):
     form = TweetForm(request.POST or None)
+    next_url = request.POST.get("next") or None
+    # print("ajax ---> ",request.is_ajax())
     if form.is_valid():
         obj = form.save(commit=False)
         obj.save()
+        if request.is_ajax():
+            return JsonResponse({}, status = 201) #201 == created items 
+
+        if next_url != None and is_safe_url(next_url,ALLOWED_HOSTS):
+            return redirect(next_url)
         form = TweetForm()
     return render(request,"components/forms.html",context={"form":form})
 
