@@ -27,7 +27,7 @@ SECRET_KEY = '@0xs(iwinf_2f=v@_hhbc(&@1xh)=022+)7r2cp0soc-&@mhgx'
 DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1']
-
+LOGIN_URL = "/login"
 
 # Application definition
 
