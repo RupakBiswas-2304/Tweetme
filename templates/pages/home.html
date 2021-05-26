@@ -4,15 +4,19 @@
 {% block content %}
 <div class="row">
     <div class="col">
-        <h2>Welcome to Tweetme</h2>
+        <h2 style="color: rgb(53, 67, 250);">Welcome to Tweetme</h2>
     </div>
 </div>
+
 
 <div class="row ">
     <div class="col-md-4 mx-auto col-10">
         <form action="/create-tweets" id="tweet-create-form" method = 'POST' class="form">{% csrf_token %}
+            <div class="d-none alert alert-danger" id = "tweet-create-form-error">
+
+            </div>
             <input type="hidden" value = "/" name="next">
-            <textarea rows="" class="form-control" name="content" placeholder="Your tweet" cols=""></textarea>
+            <textarea required='required' rows="" class="form-control" name="content" placeholder="Your tweet" cols=""></textarea>
             <button type="submit" class ="btn btn-primary">Submit</button>
         </form>
     </div>
@@ -27,26 +31,68 @@
 
 
 <script>
+    var myErrorDiv = document.getElementById("tweet-create-form-error")
+    function handletweetFormError(msg, display){
+        if (display === true){
+            //show error
+            myErrorDiv.setAttribute("class", "d alert alert-danger")
+            myErrorDiv.innerText = msg
+        }
+        else{
+            //hide errrrr
+            myErrorDiv.setAttribute("class", "d-none alert alert-danger")
+        }
+    }
+
     function handle_tweet_form_did_submite(event){
         event.preventDefault()
         const myForm = event.target
         const myFormData = new FormData(myForm)
-        // for( var myItem of myFormData.entries()){
-        //     console.log(myItem)
-        // }
         const url = myForm.getAttribute("action")
         const method = myForm.getAttribute("method")
-        // console.log(url,method)
 
         const xhr = new XMLHttpRequest()
+        const responseType = "json"
+        xhr.responseType = responseType
         xhr.open(method,url)
         xhr.setRequestHeader("XHR_X_REQUESTED_WITH","XMLHttpRequest")
         xhr.setRequestHeader("X-Requested-With","XMLHttpRequest")
         xhr.onload = function(){
-            const serverResponse = xhr.response
-            // console.log(serverResponse)
-            const tweetsEl = document.getElementById("tweets")
-            loadtweet(tweetsEl)
+
+            if (xhr.status === 201){
+                handletweetFormError("", false)
+                const newTweetjson = xhr.response
+                const newTweetElement = formattweetelement(newTweetjson)
+                const ogHtml = tweetsContainerelement.innerHTML
+                tweetsContainerelement.innerHTML = newTweetElement + ogHtml
+                myForm.reset()
+            }
+            else if (xhr.status === 400){
+                const errorJson = xhr.response
+                const contentError = errorJson.content
+                let contentErrormsg ;
+                if (contentError){
+                    contentErrormsg = contentError[0]
+                    if (contentErrormsg){
+                        handletweetFormError(contentErrormsg, true)
+                    }
+                    else{
+                        alert("An Error has occured")
+                    }
+                    // console.log(contentErrormsg)
+                }
+                else{
+                    alert("An Error has occured")
+                }
+                // console.log(errorJson)
+            }
+            else if (xhr.status === 500){
+                alert("There was a server error")
+            }
+
+        }
+        xhr.onerror = function(){
+            alert("An error occured please Try again latter")
         }
         xhr.send(myFormData)
 
@@ -55,7 +101,7 @@
     const tweetcreateform1 = document.getElementById("tweet-create-form")
     tweetcreateform1.addEventListener("submit",handle_tweet_form_did_submite )
 
-    const tweetsEl = document.getElementById("tweets")
+    const tweetsContainerelement = document.getElementById("tweets")
 
     function handledidlike(tweet_id, currentCount){
         console.log(tweet_id+"+"+currentCount)
@@ -97,7 +143,7 @@
     xhr.send()
     }
 
-    loadtweet(tweetsEl)
+    loadtweet(tweetsContainerelement)
 
 
 
