@@ -93,6 +93,10 @@
                 alert("You must login first")
                 window.location.href = "/login"
             }
+            else if(xhr.status === 403){
+                alert("You must login first")
+                window.location.href = "/login"
+            }
 
         }
         xhr.onerror = function(){
@@ -133,7 +137,7 @@
         xhr.onload = function () {
             // console.log(xhr.response)
             const serverResponse = xhr.response
-            var listeditems = xhr.response.response
+            var listeditems = serverResponse
             var finaltweetstr = ""
             var i;
             for (i = 0; i < listeditems.length; i++) {
