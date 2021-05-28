@@ -8,7 +8,7 @@ from django.conf import settings
 # import random
 from .models import Tweet
 from .form import Tweet, TweetForm
-from .serializers import TweetSerializer
+from .serializers import TweetSerializer,TweetActionSerializer
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,authentication_classes,permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -47,7 +47,7 @@ def tweet_detail_view(request, tweet_id, *args , **kwargs):
     return Response(serializer.data, status = 201)
 
 
-@api_view(['GET','DELETE','POST'])
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def tweet_delete_view(request, tweet_id, *args , **kwargs):
     qs = Tweet.objects.filter(id = tweet_id)
@@ -62,6 +62,36 @@ def tweet_delete_view(request, tweet_id, *args , **kwargs):
     obj.delete()
     # serializer = TweetSerializer(obj )
     return Response({"messgae":"Tweet removed "}, status = 201)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def tweet_action_view(request, *args , **kwargs):
+    #id also required
+    #action option --> like , unlike , retweet
+
+
+    serializer = TweetActionSerializer(data = request.data)
+    if serializer.is_valid(raise_exception=True):
+        data = serializer.validated_data
+        tweet_id = data.get("id")
+        action = data.get("action")
+        qs = Tweet.objects.filter(id = tweet_id)
+        if not qs.exists():
+            return Response({}, status= 404)
+        obj = qs.first()
+        if action == "like":
+
+            obj.likes.add(request.user)
+            serializer = TweetSerializer(obj)
+            
+            return Response(serializer.data, status= 200)
+        elif action == "unlike":
+            obj.likes.remove(request.user)
+        elif action == "retweet":
+            pass
+
+    return Response({"messgae":"Liked "}, status = 201)
 
 
 

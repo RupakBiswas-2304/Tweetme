@@ -22,6 +22,7 @@ from tweets.views import (
     tweet_detail_view,
     tweet_list_view,
     tweet_creat_view,
+    tweet_action_view,
     )
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,5 +30,6 @@ urlpatterns = [
     path('tweets',tweet_list_view),
     path('create-tweets',tweet_creat_view),
     path('tweets/<int:tweet_id>',tweet_detail_view),
+    path('api/tweets/action',tweet_action_view),
     path('api/tweets/<int:tweet_id>/delete',tweet_delete_view),
 ]
